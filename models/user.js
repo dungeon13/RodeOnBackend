@@ -15,9 +15,8 @@ const UserSchema = new mongoose.Schema({
     lname:{
         type:String
     },
-    admin:{
-        type:Boolean,
-        default:false
+    time:{
+        type:Number
     },
     cyclesbooked:[
         {

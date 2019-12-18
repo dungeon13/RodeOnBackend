@@ -6,11 +6,19 @@ const app           = express();
 const mongoose      = require("mongoose");
 const User          = require("./models/user");
 
-// connecting to mongoose
-mongoose.connect("mongodb+srv://arpit:Mongodb%4012345@cluster0-hinwt.mongodb.net/test?retryWrites=true&w=majority",{useNewUrlParser:true,useUnifiedTopology:true})
-mongoose.set('useNewUrlParser',true)
-mongoose.set('useCreateIndex',true)
 
+var isProduction = true; // make it true while uploading the code 
+// connecting to mongoose
+if(isProduction){
+    mongoose.connect("mongodb+srv://arpit:Mongodb%4012345@cluster0-hinwt.mongodb.net/test?retryWrites=true&w=majority",{useNewUrlParser:true,useUnifiedTopology:true})
+    mongoose.set('useNewUrlParser',true)
+    mongoose.set('useCreateIndex',true)
+
+}
+else{
+    mongoose.connect("mongodb://localhost/rideon",{useNewUrlParser:true,useUnifiedTopology:true,useFindAndModify:false,useCreateIndex:true})
+    mongoose.set('useNewUrlParser',true);
+}
 app.use(bodyParser.urlencoded({extended:true}));
 
 // passport configuration
@@ -44,7 +52,7 @@ app.get("/test",(req,res)=>{
     })
 })
 
-var isProduction = true; // make it true while uploading the code 
+
 
 if(isProduction){
     app.listen(process.env.PORT, process.env.IP);

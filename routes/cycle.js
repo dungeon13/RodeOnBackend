@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+var User = require("../models/user");
 const Cycle = require("../models/cycle");
 const Booked = require("../models/booked");
 const middleWare = require("./middleware");
@@ -17,9 +18,22 @@ const options = {
 }
 
 router.post("/endRide",(req,res)=>{
-    console.log(req.body);
-    res.send({
-        message:"1"
+    var data = JSON.parse(Object.keys(req.body)[0]);
+    console.log(data);
+    var username = data.username;
+    var time = data.time;
+    User.findOne({username:username},(err,response)=>{
+        if(err){
+            res.send({
+                message:"error"
+            })
+        }
+        else{
+            //console.log(response)
+            res.send({
+                message:"1"
+            })
+        }
     })
 })
 
@@ -31,7 +45,7 @@ router.post("/unlock",(req,res)=>{
             })
         }else{
             //console.log(response)
-            console.log(body)
+            //console.log(body)
             res.send({
                 message:"1"
             })
