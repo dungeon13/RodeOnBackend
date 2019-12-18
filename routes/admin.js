@@ -1,70 +1,95 @@
-// add the information for the different cars
+// add the information for the different cycles
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const methodOverride = require("method-override");
-const Car = require("../models/car")
+const Cycle = require("../models/cycle")
 const middleWare = require("./middleware")
-// login for the admin
-router.get("/login",(req,res)=>{
-    passport.authenticate('local',(err,user,info)=>{
+const User = require("../models/user")
+// add the cycle
+router.post("/add",middleWare.isLoggedIn,(req,res)=>{
+    var id = req.user._id
+    User.findById(id,(err,user)=>{
         if(err){
             res.send({
-                "message":"error"
+                message:"error"
             })
         }
-        if(!user){
-            res.send({
-                "message":"Invalid Username/Password"
-            })
-        }
-        req.logIn(user,(err)=>{
-            if(err){
-                res.send({
-                    "message":"error"
-                })
+        else if(user.admin){
+            Cycle.create(req.body,(err,cycle)=>{
+                if(err){
+                res.send(err)
             }
             else{
-                res.send({
-                    status:200
-                })
-            }
-        })
-    })(req,res)
-})
-
-// logOut admin 
-router.get("/logout",(req,res)=>{
-    req.logOut();
-    res.send({
-        "message":"Logged Out"
-    })
-})
-
-// add the car
-router.post("/add",(req,res)=>{
-    Car.create(req.body,(err,car)=>{
-        if(err){
-            res.send(err)
+                res.status(200).send(cycle)
+                }
+            })
         }
         else{
-            res.status(200).send(car)
+            res.send({
+                message:"Not Allowed"
+            })
         }
     })
+    
+    
 })
-// upddate car
+// upddate cycle
 router.post("/update",middleWare.isLoggedIn,(req,res)=>{
-    var vno = req.body.vno
-    var rent = req.body.rent
-    var spoint = req.body.spoint
-    Car.findOneAndUpdate({vno:vno},{rent:rent,spoint:spoint},(err,car)=>{
-        res.send(car)
+    var id = req.user._id
+    User.findById(id,(err,user)=>{
+        if(err){
+            res.send({
+                message:"error"
+            })
+        }
+        else if(user.admin){
+            var vno = req.body.vno
+            var rent = req.body.rent
+            var spoint = req.body.spoint
+            Cycle.findOneAndUpdate({vno:vno},{rent:rent,spoint:spoint},(err,cycle)=>{
+                res.status(200).send(cycle)
+            })
+        }
+        else{
+            res.send({
+                message:"Not Allowed"
+            })
+        }
     })
+    
 }) 
-// delete car 
+// delete cycle 
 router.post("/delete",middleWare.isLoggedIn,(req,res)=>{
-    Car.findByIdAndDelete()
+    var id = req.user._id
+    User.findById(id,(err,user)=>{
+        if(err){
+            res.status(500).send({
+                message:"error"
+            })
+        }
+        else if(user.admin){
+            Cycle.findOneAndRemove({vno:req.body.vno,bookingStatus:0},(err,response)=>{
+                if(err){
+                    res.status(500).send({
+                        message:"error"
+                    })
+                }
+                else{
+                    console.log(response)
+                    res.send({
+                        message:"deleted"
+                    })
+                }
+            })
+        }
+        else{
+            res.send({
+                message:"Not Allowed"
+            })
+        }
+    })
 })
 router.get("/",(req,res)=>{
     res.send({

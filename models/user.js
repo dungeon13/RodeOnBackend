@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
 const UserSchema = new mongoose.Schema({
-    username:{
+    username:{  // roll number
         type:String,
         required:true,
         unique:true
@@ -15,10 +15,14 @@ const UserSchema = new mongoose.Schema({
     lname:{
         type:String
     },
-    carsbooked:[
+    admin:{
+        type:Boolean,
+        default:false
+    },
+    cyclesbooked:[
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref:"Cars"
+            ref:"Cycle"
         }
     ]
 })

@@ -7,7 +7,7 @@ const mongoose      = require("mongoose");
 const User          = require("./models/user");
 
 // connecting to mongoose
-mongoose.connect("mongodb://localhost/whitepanda",{useNewUrlParser:true,useUnifiedTopology:true})
+mongoose.connect("mongodb+srv://arpit:Mongodb%4012345@cluster0-hinwt.mongodb.net/test?retryWrites=true&w=majority",{useNewUrlParser:true,useUnifiedTopology:true})
 mongoose.set('useNewUrlParser',true)
 mongoose.set('useCreateIndex',true)
 
@@ -32,13 +32,26 @@ app.use((req,res,next)=>{
 })
 // getting all the routes
 const user = require("./routes/user");
-const car = require("./routes/car");
+const cycle = require("./routes/cycle");
 const admin = require("./routes/admin");
 app.use("/user",user);
-app.use("/car",car);
-app.use("/admin",admin)
+app.use("/cycle",cycle);
+app.use("/admin",admin);
 
-const port = 8080;
-app.listen(port,()=>{
-    console.log(`Server is listening at ${port}..`);
+app.get("/test",(req,res)=>{
+    res.send({
+        message:"Testing"
+    })
 })
+
+var isProduction = true; // make it true while uploading the code 
+
+if(isProduction){
+    app.listen(process.env.PORT, process.env.IP);
+}
+else{
+    const port = 8080;
+    app.listen(port,()=>{
+        console.log(`Server is listening at ${port}..`);
+})
+}

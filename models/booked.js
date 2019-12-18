@@ -4,6 +4,9 @@ const bookedCar = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Cars"
     },
+    vno:{
+        type:String
+    },
     user:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"

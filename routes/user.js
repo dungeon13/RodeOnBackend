@@ -4,67 +4,78 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const methodOverride = require("method-override");
 const User = require("../models/user")
+var passwordHash = require('password-hash');
 
 
-router.get("/profile",(req,res)=>{
-    if(req.user==undefined){
-        res.send({
-            "message":"You need to logIn"
-        })
-    }
-    else{
-        //console.log(req.user._id)    
-        User.findById(req.user._id,(err,user)=>{
-         if(err){
-             res.send(err)
-         }
-         else{
-             res.send(user)
-         }
-     })
-    }   
-})
-router.post("/login",function(req,res){
-    passport.authenticate('local',function(err,user,info){
+router.post('/login',function (req,res) {
+    //console.log("here")
+    var data = JSON.parse(Object.keys(req.body)[0]);
+    var username = data.username;
+    var password = data.password;
+    User.find({"username" : username },function(err,res1){
+        // console.log( passwordHash.verify(password, res1[0].password));
+           if(res1.length>0 && passwordHash.verify(password, res1[0].password))
+           {
+               req.session.username = username;
+                res.send({
+                    message:"1"
+                })
+           }
+           else
+           {
+              res.send({
+                  message:"Incorrect Username/Password"
+              })
+           }
+            
+  });
+  });
+
+  router.post('/signup',function (req,res) {
+    var data = JSON.parse(Object.keys(req.body)[0]);
+    var username = data.roll;
+    var password = data.password;
+    var hashedPassword = passwordHash.generate(password);
+    var fname = data.firstname
+    var lname = data.lastname
+    var user = new User({
+      username : username,
+      password : hashedPassword,
+      fname:fname,
+      lname:lname
+    });
+    User.find({"username":username},(err,user1)=>{
         if(err){
-            res.send(err)
-        }
-        if(!user){
             res.send({
-                "message":"Invalid Username or password"
+                message:"0"
             })
         }
-        req.logIn(user,function(err){
-            if(err){
-                res.send(err)
-            }else{
-                res.send({
-                    "message":"Logged In"
+        else if(user1.length===0){
+            user.save()
+                .then(item=>{
+                    res.send({
+                        message:"1"
+                    });
                 })
-            }
-        })
-    })(req,res)
-})
-router.post("/signup",(req,res)=>{
-    var newUser = new User({username:req.body.username,fname:req.body.fname,lname:req.body.lname})
-    User.register(newUser,req.body.password,(err,user)=>{
-        if(err){
-            //console.log(err)
-            res.send(err)
+                    .catch(err=>{
+                        res.status(400).send({
+                            message:"0"
+                        })
+                    })
         }
         else{
-            passport.authenticate("local")(req,res,function(){
-                res.send({
-                    "message":"signup success"
-                })
+            res.send({
+                message:"Username already exists"
             })
         }
     })
-})
-router.get("/logout",(req,res)=>{
-    req.logOut();
+    
+  });
+
+  router.get('/logout', function (req, res) {
+    delete req.session.username;
     res.send({
-        "message":"logged Out"
+        message:"1"
     })
-})
+  });
 module.exports = router;
